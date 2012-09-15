@@ -1,0 +1,4 @@
+* TODO Print prompt in Repl loop & wait for user input instead of spinning.
+* DONE Repl should not depend on StateMachine or Expression directly; depend on interfaces.
+  CLOSED: [2012-09-15 Sat 22:25]
+* TODO Write unit tests for Repl

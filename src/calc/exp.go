@@ -12,8 +12,14 @@ const (
 )
 
 type Expression struct {
-	Operator OpCode
-	Operands []float64
+	operator OpCode
+	operands []float64
+}
+
+type ExpressionFactory struct { }
+
+func (this ExpressionFactory) NewEvaluator() Evaluator {
+	return new(Expression)
 }
 
 var operators = map[OpCode]func([]float64) float64{
@@ -52,13 +58,27 @@ var operators = map[OpCode]func([]float64) float64{
 }
 
 func (this Expression) Evaluate() (float64, error) {
-	if this.Operands == nil || len(this.Operands) == 0 {
+	if this.operands == nil || len(this.operands) == 0 {
 		return 0, errors.New("No operands provided")
 	}
 
-	if fn, ok := operators[this.Operator]; ok {
-		return fn(this.Operands), nil
+	if fn, ok := operators[this.operator]; ok {
+		return fn(this.operands), nil
 	}
 
 	return 0, errors.New("Unknown opcode")
+}
+
+func (this *Expression) Operator(operator *OpCode) OpCode {
+	if (operator != nil) {
+		this.operator = *operator
+	}
+	return this.operator
+}
+
+func (this *Expression) Operands(operands []float64) []float64 {
+	if (operands != nil) {
+		this.operands = operands
+	}
+	return this.operands
 }

@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-type fsmProcessResult struct {
+type fsmResult struct {
 	state int
 	err error
 }
@@ -13,23 +13,23 @@ type fsmProcessResult struct {
 type fsmTest struct {
 	msg string
 	input interface{}
-	res fsmProcessResult
+	res fsmResult
 }
 
 func TestStateMachine(t *testing.T) {
 	tests := []fsmTest {
-		{ "Transition from 'started' to 'operator'", "SUM", fsmProcessResult{stateOperator, nil} },
-		{ "Transition from 'operator' to 'operand'", "10", fsmProcessResult{stateOperand, nil} },
-		{ "Transition from 'operand' to 'operand'", "20", fsmProcessResult{stateOperand, nil} },
-		{ "Transition from 'operand' to 'sentinel'", "\n", fsmProcessResult{stateSentinel, nil} },
-		{ "Transtion from 'sentinel' to 'stopped'", io.EOF, fsmProcessResult{stateStopped, nil} },
+		{ "Transition from 'started' to 'operator'", "SUM", fsmResult{stateOperator, nil} },
+		{ "Transition from 'operator' to 'operand'", "10", fsmResult{stateOperand, nil} },
+		{ "Transition from 'operand' to 'operand'", "20", fsmResult{stateOperand, nil} },
+		{ "Transition from 'operand' to 'sentinel'", "\n", fsmResult{stateSentinel, nil} },
+		{ "Transtion from 'sentinel' to 'stopped'", io.EOF, fsmResult{stateStopped, nil} },
 	}
 
 	fsm := NewStateMachine(expRules, nil)
 
 	for _, tt := range tests {
 		state, err := fsm.Process(tt.input)
-		res := fsmProcessResult{state, err}
+		res := fsmResult{state, err}
 		verify(t, tt.msg, tt.input, res, tt.res)
 	}
 }

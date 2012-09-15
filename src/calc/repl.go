@@ -8,26 +8,47 @@ import (
 	"strings"
 )
 
+type Processor interface {
+	Process(interface{}) (int, error)
+}
+
+type Evaluator interface {
+	Evaluate() (float64, error)
+	Operator(*OpCode) OpCode
+	Operands([]float64) []float64
+}
+
+type EvaluatorFactory interface {
+	NewEvaluator() Evaluator
+}
+
 type Repl struct {
 	buf []rune
-	fsm *StateMachine
-	exp *Expression
+	fsm Processor
+	fac EvaluatorFactory
+	exp Evaluator
 	out io.Writer
 	err io.Writer
 	in io.RuneReader
 	skip bool
 }
 
-func NewRepl(in io.RuneReader, out io.Writer, err io.Writer) *Repl {
-	r := new(Repl)
-	r.fsm = NewStateMachine(expRules, r)
-	r.in = in
-	r.out = out
-	r.err = err
-	return r
+func NewRepl(in io.RuneReader, out io.Writer, err io.Writer) (r *Repl) {
+	r = &Repl{in: in, out: out, err: err}
+	return
 }
 
-func (this *Repl) Read() {
+func (this *Repl) ReadDefault() {
+	fsm := NewStateMachine(expRules, this)
+	fac := new(ExpressionFactory)
+	this.Read(fsm, fac)
+}
+
+func (this *Repl) Read(fsm Processor, fac EvaluatorFactory) {
+	this.fsm = fsm
+	this.fac = fac
+	this.exp = fac.NewEvaluator()
+
 	fmt.Fprintln(this.err, "Enter expressions to evaluate followed by a newline.",
 		"Type \"QUIT\" to exit.")
 
@@ -86,7 +107,7 @@ func (this Repl) evalAndPrint() {
 		fmt.Fprintln(this.err, err)
 	} else {
 		fmt.Fprintf(this.out, "%s: %f\n", 
-			tokensByOperator[this.exp.Operator], num)
+			tokensByOperator[this.exp.Operator(nil)], num)
 	}
 	return
 }
@@ -95,11 +116,12 @@ func (this *Repl) StateChanged(fromState int, toState int, input interface{}) {
 	if tok, ok := input.(string); ok {
 		switch toState {
 		case stateOperator:
-			this.exp = new(Expression)
-			this.exp.Operator = operatorsByToken[tok]
+			op := operatorsByToken[tok]
+			this.exp = this.fac.NewEvaluator()
+			this.exp.Operator(&op)
 		case stateOperand:
 			num, _ := strconv.ParseFloat(tok, 64)
-			this.exp.Operands = append(this.exp.Operands, num)
+			this.exp.Operands(append(this.exp.Operands(nil), num))
 		case stateSentinel:
 			this.evalAndPrint()
 			this.exp = nil

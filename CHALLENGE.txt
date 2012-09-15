@@ -1,0 +1,22 @@
+Write a program to solve the following problem. Please provide the
+source code as well as any additional data (e.g. tests), files
+(e.g. build scripts) or information (e.g. assumptions you've made,
+known bugs, etc.) that you think we should have. Please don’t send
+executable code, as this will be blocked by our mail-servers. Your
+code should be of a sufficient quality that it can run on a live
+business-critical system.
+
+You have a text file where each line consists of an operator followed
+by a colon followed by a comma-separated list of numbers. For each
+line perform the operation on the numbers and print the results. The
+valid operators are 'SUM', 'MIN', 'MAX' and 'AVERAGE'.
+
+E.g. for the file
+
+SUM: 1, 2, 3
+MIN: 4, 3, 2
+
+your program should print:
+
+SUM: 6
+MIN: 2

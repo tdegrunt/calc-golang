@@ -1,0 +1,4 @@
+-*- mode: Org -*-
+
+* TODO Print prompt in REPL loop & wait for user input instead of spinning
+* TODO Repl is getting fat & ugly; reduce side-effects FTW

@@ -4,7 +4,7 @@
 * Summary
 
 This directory contains =calc=, my solution to the AWS challenge in the Go
-programming language [fn:1]. The challenge was stated as follows:
+programming language[fn:1]. The challenge was stated as follows:
 
 #+BEGIN_QUOTE
 You have a text file where each line consists of an operator followed
@@ -42,7 +42,7 @@ To build the code in this directory, you need to have the Go tools
 installed. You can download binaries for your platform from the Go
 project's [[http://code.google.com/p/go/downloads][download page]]. For Windows, simply download and run the MSI
 installer. For Linux, download the tarball and extract its contents to
-/usr/local/.
+~/usr/local/~.
 
 Verify that Go is intalled correctly by launching a shell (command
 prompt on Windows) and typing =go=. If all is well you should see the
@@ -80,7 +80,7 @@ Additional help topics:
 * Testing
 
 You can run a set of unit tests by launching a shell, changing to the
-~calc~ subdirectory and typing =go test=. You should see output
+~./src/calc~ subdirectory and typing =go test=. You should see output
 similar to the following.
 
 #+BEGIN_EXAMPLE
@@ -118,7 +118,7 @@ use it in a similar fashion to the venerable Unix calc utility. Below
 is an example that performs some calculations, sorts the results in
 descending numeric order and discards all but the top 2 result. This
 example requires a Unix-like environment to run. On Windows you could
-download [[https://github.com/bmatzelle/gow/wiki/][Gow]] for a basic set of Unix utilities and Bash.
+download [[https://github.com/bmatzelle/gow/wiki/][Gow]] for a basic set of Unix utilities incl Bash.
 
 #+BEGIN_EXAMPLE
 $ cat sample_input.txt | ./calc.exe 2>/dev/null | cut -d ' ' -f 2 |

@@ -16,7 +16,7 @@ type Expression struct {
 	operands []float64
 }
 
-type ExpressionFactory struct { }
+type ExpressionFactory int
 
 func (this ExpressionFactory) NewEvaluator() Evaluator {
 	return new(Expression)

@@ -21,12 +21,14 @@ type replTest struct {
 type testProcessor struct { 
 	states []int
 	errors []error
+	delegate StateMachineDelegate
 	i int
 }
 
 func (this testProcessor) Process(input interface{}) (state int, err error) {
 	state, err = this.states[this.i], this.errors[this.i]
 	this.i += 1
+	this.delegate.StateChanged(state-1, state, input)
 	return
 }
 
@@ -57,19 +59,20 @@ func (this testEvaluatorFactory) NewEvaluator() Evaluator {
 } 
 
 func TestRepl(t *testing.T) {
+	var in, out, err bytes.Buffer
+	repl := NewRepl(&in, &out, &err)
+
 	tests := []replTest {
 		{ "The sum of 10, 20, 30 is 60", "sum:10,20,30\n", replResult{"SUM:60\n", ""}, 
 			testProcessor { 
-				states: []int { stateOperator, stateOperand, stateOperand, stateOperand, stateSentinel },
-				errors: []error { nil, nil, nil, nil, nil },
+				states: []int { stateOperator, stateOperand, stateOperand, stateOperand, stateSentinel, stateStopped },
+				errors: []error { nil, nil, nil, nil, nil, nil },
+				delegate: repl,
 			},
 			testEvaluatorFactory { &testEvaluator{OpSum, 60, nil} },
 		},
 	}
 	
-	var in, out, err bytes.Buffer
-	repl := NewRepl(&in, &out, &err)
-
 	for _, tt := range tests {
 		in.WriteString(tt.in)
 		repl.Read(tt.fsm, tt.fac)

@@ -1,3 +1,7 @@
+// ## Repl
+
+// A simple, interactive expression evaluation environment.
+
 package calc
 
 import (
@@ -8,6 +12,8 @@ import (
 	"strings"
 )
 
+
+// In order to keep `Repl` generic we depend on intefaces rather than concretions.
 type Processor interface {
 	Process(interface{}) (int, error)
 }
@@ -22,6 +28,10 @@ type EvaluatorFactory interface {
 	NewEvaluator() Evaluator
 }
 
+// We need to maintain a buffer containing the characters read thus far but not yet
+// evaluated, our state machine, a factory used to create new expressions, the current
+// expression, IO streams, as well as a boolean indicating whether to skip characters
+// from the input stream.
 type Repl struct {
 	buf []rune
 	fsm Processor
@@ -33,11 +43,17 @@ type Repl struct {
 	skip bool
 }
 
+// ### Creation
+
+// To instantiate a repl we need three IO streams corresponding to stdin, stdout & stderr.
 func NewRepl(in io.RuneReader, out io.Writer, err io.Writer) (r *Repl) {
 	r = &Repl{in: in, out: out, err: err}
 	return
 }
 
+// ### Usage
+
+// `ReadDefault` uses the default concretions for `Processor` and `EvaluatorFactory`.
 func (this *Repl) ReadDefault() {
 	fsm := NewStateMachine(expRules, this)
 	fac := new(ExpressionFactory)
@@ -54,9 +70,8 @@ func (this *Repl) Read(fsm Processor, fac EvaluatorFactory) {
 
 	for {
 		if r, count, err := this.in.ReadRune(); err != nil {
-			// eof: exit loop
-			this.fsm.Process(io.EOF)
-			return
+			this.fsm.Process(io.EOF) 
+			return // eof: exit loop
 		} else if r == unicode.ReplacementChar && count == 1 {
 			fmt.Fprintln(this.err, "Invalid character in input.")
 			this.skip = true
@@ -66,14 +81,21 @@ func (this *Repl) Read(fsm Processor, fac EvaluatorFactory) {
 	}
 }
 
+// ### Internals
+
+// Here we determine how to action a character:
+
+// * If we encounter a delimiter we flush the input buffer to a string and feed it into the state machine. 
+// * If we've reached the end of the expression and notify the state machine. 
+// * Otherwise, we append the character to the input buffer.
 func (this *Repl) handleRune(r rune) bool {
 	if this.skip {
 		if r == '\n' {
 			this.skip = false
 		}
 	} else if _, ok := delimiters[r]; ok {
-		// delimiter: flush buffer & feed the machine
-		tok := this.flushBuffer()
+		
+		tok := this.flushBuffer() // delimiter: flush buffer & feed the machine
 		
 		if tok == "QUIT" {
 			fmt.Fprintln(this.err, "Goodbye!")
@@ -84,12 +106,10 @@ func (this *Repl) handleRune(r rune) bool {
 			fmt.Fprintln(this.err, err.Error())
 			this.skip = true
 		} else if r == '\n' {
-			// sentinel: end of expression
-			this.fsm.Process(string(r))
+			this.fsm.Process(string(r)) // sentinel: end of expression
 		}
 	} else {
-		// append char to input buffer
-		this.buf = append(this.buf, r)
+		this.buf = append(this.buf, r) // append char to input buffer
 	}
 
 	return true
@@ -112,6 +132,12 @@ func (this Repl) evalAndPrint() {
 	return
 }
 
+// This is our state machine callback. Depending on the current state we either
+
+// * evaluate the current expression
+// * append the input to the collection of operands
+// * evaluate and print the result
+// * do nothing
 func (this *Repl) StateChanged(fromState int, toState int, input interface{}) {
 	if tok, ok := input.(string); ok {
 		switch toState {
@@ -142,4 +168,3 @@ var tokensByOperator = map[OpCode]string {
 	OpMax : "MAX",
 	OpAvg : "AVG",
 }
-

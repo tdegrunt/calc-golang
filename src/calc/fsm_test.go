@@ -7,17 +7,15 @@ import (
 
 type fsmResult struct {
 	state int
-	err error
-}
-
-type fsmTest struct {
-	msg string
-	input interface{}
-	res fsmResult
-}
+	err error			
+}	
 
 func TestStateMachine(t *testing.T) {
-	tests := []fsmTest {
+	tests := []struct {
+		msg string
+		input interface{}
+		res fsmResult
+	}{
 		{ "Transition from 'started' to 'operator'", "SUM", fsmResult{stateOperator, nil} },
 		{ "Transition from 'operator' to 'operand'", "10", fsmResult{stateOperand, nil} },
 		{ "Transition from 'operand' to 'operand'", "20", fsmResult{stateOperand, nil} },
@@ -29,7 +27,7 @@ func TestStateMachine(t *testing.T) {
 
 	for _, tt := range tests {
 		state, err := fsm.Process(tt.input)
-		res := fsmResult{state, err}
+		res := fsmResult { state, err }
 		verify(t, tt.msg, tt.input, res, tt.res)
 	}
 }

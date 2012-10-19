@@ -10,14 +10,6 @@ type replResult struct {
 	err string
 }
 
-type replTest struct {
-	msg string
-	in string
-	res replResult
-	fsm testProcessor
-	fac testEvaluatorFactory
-}
-
 type testProcessor struct { 
 	states []int
 	errors []error
@@ -62,7 +54,13 @@ func TestRepl(t *testing.T) {
 	var in, out, err bytes.Buffer
 	repl := NewRepl(&in, &out, &err)
 
-	tests := []replTest {
+	tests := [] struct {
+		msg string
+		in string
+		res replResult
+		fsm testProcessor
+		fac testEvaluatorFactory
+	}{
 		{ "The sum of 10, 20, 30 is 60", "sum:10,20,30\n", replResult{"SUM:60\n", ""}, 
 			testProcessor { 
 				states: []int { stateOperator, stateOperand, stateOperand, stateOperand, stateSentinel, stateStopped },
@@ -76,7 +74,10 @@ func TestRepl(t *testing.T) {
 	for _, tt := range tests {
 		in.WriteString(tt.in)
 		repl.Read(tt.fsm, tt.fac)
-		res := replResult{out.String(), err.String()}
+		res := replResult {
+			out.String(), 
+			err.String(),
+		}
 
 		verify(t, tt.msg, tt.in, res, tt.res)
 

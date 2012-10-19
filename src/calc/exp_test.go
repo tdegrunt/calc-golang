@@ -10,14 +10,12 @@ type expResult struct {
 	err error
 }
 
-type expTest struct {
-	msg string
-	exp Expression
-	res expResult
-}
-
 func TestExpression(t *testing.T) {
-	tests := []expTest {
+	tests := []struct {
+		msg string
+		exp Expression
+		res expResult
+	}{
 		{"The sum of 10, 20, 30 is 60", Expression{OpSum, []float64{10, 20, 30}}, expResult{60, nil}},
 		{"The min of 30, 10, -1, 20 is -1", Expression{OpMin, []float64{30, 10, -1, 20}}, expResult{-1, nil}},
 		{"The max of 0, 2, 4.5, -20 is 4.5", Expression{OpMax, []float64{0, 2, 4.5, -20}}, expResult{4.5, nil}},
@@ -28,7 +26,7 @@ func TestExpression(t *testing.T) {
 
 	for _, tt := range tests {
 		num, err := tt.exp.Evaluate()
-		res := expResult{num, err}
+		res := expResult { num, err }
 		verify(t, tt.msg, tt.exp, res, tt.res)
 	}
 }

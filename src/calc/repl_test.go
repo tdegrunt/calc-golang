@@ -24,6 +24,9 @@ func (this testProcessor) Process(input interface{}) (state int, err error) {
 	return
 }
 
+func (this testProcessor) Reset() {
+}
+
 type testEvaluator struct {
 	op OpCode
 	res float64

@@ -56,6 +56,10 @@ func (this *StateMachine) Process(input interface{}) (state int, err error) {
 	return
 }
 
+func (this *StateMachine) Reset() {
+	this.state = this.rules[0].FromState
+}
+
 func (this StateMachine) findRule(input interface{}) *StateMachineRule {
 	for _, r := range this.rules {
 		if r.FromState == this.state && r.SatisfiedBy(input) {

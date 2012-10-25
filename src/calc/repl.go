@@ -16,6 +16,7 @@ import (
 // In order to keep `Repl` generic we depend on intefaces rather than concretions.
 type Processor interface {
 	Process(interface{}) (int, error)
+	Reset()
 }
 
 type Evaluator interface {
@@ -104,7 +105,10 @@ func (this *Repl) handleRune(r rune) bool {
 
 		if _, err := this.fsm.Process(tok); err != nil {
 			fmt.Fprintln(this.err, err.Error())
-			this.skip = true
+			this.fsm.Reset()
+			if r != '\n' {
+				this.skip = true
+			}
 		} else if r == '\n' {
 			this.fsm.Process(string(r)) // sentinel: end of expression
 		}
